@@ -34,6 +34,7 @@ The backtest evaluates:
 ## Backtesting Methodology
 - Signals are applied with a one-day lag to avoid look-ahead bias  
 - Transaction costs are applied when positions change
+- Returns are computed using close-to-close prices (no intraday execution modeling)
 
 ## Results
 
@@ -46,7 +47,7 @@ The mean reversion strategy significantly underperforms buy-and-hold on SPY and 
 
 After incorporating transaction costs, performance deteriorates further, indicating that the strategy relies heavily on frequent trading and small price movements.
 
-These results highlight an important limitation: while mean reversion strategies may work in range-bound environments, they tend to fail in strongly trending markets such as SPY. The evidence suggests the strategy’s failure is structural rather than due to parameter choice, and that naive mean reversion is not effective on SPY without additional constraints.
+These results highlight an important limitation: while mean reversion strategies may work in range-bound environments, they tend to fail in strongly trending markets such as SPY. The results indicate that the strategy’s failure is structural rather than due to parameter choice, and that naive mean reversion is not effective on SPY without additional constraints.
 
 ## Parameter Sensitivity Analysis
 
@@ -60,6 +61,24 @@ Performance remains negative across all parameter combinations, suggesting that 
 More conservative configurations (longer lookback windows and higher thresholds) reduce trading frequency and improve results, indicating that overtrading and transaction costs are key drivers of underperformance.
 
 Even in the best cases, the strategy fails to generate positive risk-adjusted returns, reinforcing the importance of incorporating additional filters or constraints.
+
+## Trend Filter Experiment
+
+To test whether the strategy’s underperformance was driven by trading against persistent trends, a trend filter based on a 50-day moving average was introduced.
+
+- Long trades were only allowed when price was above the 50-day moving average  
+- Short trades were only allowed when price was below the 50-day moving average  
+
+This reduced the number of trades from 417 to 100 and significantly improved performance:
+
+| Strategy | Total Return | Sharpe | Max Drawdown |
+|----------|-------------|--------|--------------|
+| Baseline | -53.3%      | -0.69  | -55.3%       |
+| Filtered | -17.3%      | -0.51  | -19.8%       |
+
+The trend filter significantly improves performance, reducing losses, drawdowns, and trading frequency. This suggests that a major source of underperformance was excessive trading and taking positions against persistent market trends.
+
+However, the strategy remains unprofitable even after filtering, indicating that naive mean reversion is not a robust standalone strategy for SPY.
 
 ## Key Insights
 - Transaction costs can eliminate apparent strategy edge  

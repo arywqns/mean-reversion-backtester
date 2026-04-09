@@ -4,37 +4,43 @@ from src.backtest import run_backtest
 from src.metrics import compute_metrics
 from src.plot import plot_equity_curves
 
-import pandas as pd
 
 def main():
     ticker = "SPY"
     df = load_data(ticker = ticker)
 
-    windows = [10, 20, 50]
-    thresholds = [0.5, 1.0, 1.5]
+    # Baseline strategy
+    baseline_df = generate_signals(df, window = 20, z_threshold = 1.0, use_trend_filter = False)
+    baseline_df = run_backtest(baseline_df)
+    baseline_metrics = compute_metrics(baseline_df["strategy_returns"])
 
-    results = []
+    # Trend filited strategy
+    filtered_df = generate_signals(df, window = 20, z_threshold = 1.0, use_trend_filter = True, trend_window = 50)
+    filtered_df = run_backtest(filtered_df)
+    filtered_metrics = compute_metrics(filtered_df["strategy_returns"])
 
-    for w in windows:
-        for t in thresholds:
-            temp_df = generate_signals(df, window=w, z_threshold=t)
-            temp_df = run_backtest(temp_df)
+    # Buy and Hold
+    buy_hold_metrics = compute_metrics(filtered_df["returns"])
 
-            metrics = compute_metrics(temp_df["strategy_returns"])
+    print(f"\nResults for {ticker}\n")
 
-            results.append({
-                "window": w,
-                "threshold": t,
-                "total_return": metrics["total_return"],
-                "sharpe": metrics["sharpe_ratio"],
-                "max_drawdown": metrics["max_drawdown"]
-            })
-        
-    results_df = pd.DataFrame(results)
-    print("\nParameter Sweep Results:\n")
-    print(results_df)
+    print("Baseline Mean Reversion:")
+    for key, value in baseline_metrics.items():
+        print(f"{key}: {value:.4f}")
 
-    results_df.to_csv("results/parameter_sweep.csv", index=False)
+    print("\nTrend-Filtered Mean Reversion:")
+    for key, value in filtered_metrics.items():
+        print(f"{key}: {value:.4f}")
+
+    print("\nBuy-and-Hold:")
+    for key, value in buy_hold_metrics.items():
+        print(f"{key}: {value:.4f}")
+
+    print("\nBaseline number of trades:", baseline_df["trades"].sum())
+    print("Trend-filtered number of trades:", filtered_df["trades"].sum())
+    
+    plot_equity_curves(baseline_df, output_path="results/baseline_equity_curve.png")
+    plot_equity_curves(filtered_df, output_path="results/trend_filtered_equity_curve.png")
 
 if __name__ == "__main__":
     main()
