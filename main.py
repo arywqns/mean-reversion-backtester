@@ -4,28 +4,37 @@ from src.backtest import run_backtest
 from src.metrics import compute_metrics
 from src.plot import plot_equity_curves
 
+import pandas as pd
+
 def main():
     ticker = "SPY"
+    df = load_data(ticker = ticker)
 
-    df = load_data(ticker = ticker, start = "2018-01-01", end = "2025-01-01")
-    df = generate_signals(df, window = 20, z_threshold = 1.0)
-    df = run_backtest(df)
+    windows = [10, 20, 50]
+    thresholds = [0.5, 1.0, 1.5]
 
-    strategy_metrics = compute_metrics(df["strategy_returns"])
-    buy_hold_metrics = compute_metrics(df["returns"])
+    results = []
 
-    print(f"\nResults for {ticker}\n")
+    for w in windows:
+        for t in thresholds:
+            temp_df = generate_signals(df, window=w, z_threshold=t)
+            temp_df = run_backtest(temp_df)
 
-    print("Strategy Metrics:")
-    for key, value in strategy_metrics.items():
-        print(f"{key}: {value:.4f}")
+            metrics = compute_metrics(temp_df["strategy_returns"])
 
-    print("\nBuy-and-Hold Metrics:")
-    for key, value in buy_hold_metrics.items():
-        print(f"{key}: {value:.4f}")
-    
-    plot_equity_curves(df)
+            results.append({
+                "window": w,
+                "threshold": t,
+                "total_return": metrics["total_return"],
+                "sharpe": metrics["sharpe_ratio"],
+                "max_drawdown": metrics["max_drawdown"]
+            })
+        
+    results_df = pd.DataFrame(results)
+    print("\nParameter Sweep Results:\n")
+    print(results_df)
+
+    results_df.to_csv("results/parameter_sweep.csv", index=False)
 
 if __name__ == "__main__":
     main()
-

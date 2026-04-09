@@ -21,9 +21,9 @@ def compute_metrics(returns: pd.Series) -> dict:
     max_drawdown = drawdown.min()
 
     return{
-        "total return": total_return,
-        "annualized return": annualized_return,
+        "total_return": total_return,
+        "annualized_return": annualized_return,
         "volatility": volatility,
-        "sharpe ratio": sharpe,
-        "max drawdown": max_drawdown
+        "sharpe_ratio": sharpe,
+        "max_drawdown": max_drawdown
     }
