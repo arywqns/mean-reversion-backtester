@@ -3,11 +3,13 @@ from src.signals import generate_signals
 from src.backtest import run_backtest
 from src.metrics import compute_metrics
 from src.plot import plot_equity_curves
-
+from src.analysis import compute_autocorrelation
 
 def main():
     ticker = "SPY"
     df = load_data(ticker = ticker)
+
+    compute_autocorrelation(df)
 
     # Baseline strategy
     baseline_df = generate_signals(df, window = 20, z_threshold = 1.0, use_trend_filter = False)

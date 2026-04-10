@@ -80,6 +80,16 @@ The trend filter significantly improves performance, reducing losses, drawdowns,
 
 However, the strategy remains unprofitable even after filtering, indicating that naive mean reversion is not a robust standalone strategy for SPY.
 
+## Autocorrelation Analysis
+
+To evaluate whether mean reversion is present in SPY, I computed the autocorrelation of daily returns.
+
+The results show a negative autocorrelation (-0.1356), indicating that returns exhibit mild mean-reverting behavior.
+
+However, despite this, the strategy remains unprofitable. This suggests that while mean reversion exists statistically, the signal is too weak to overcome transaction costs and noise in the market.
+
+This highlights a key limitation: the presence of a statistical signal does not necessarily imply a profitable trading strategy.
+
 ## Key Insights
 - Transaction costs can eliminate apparent strategy edge  
 - Strategy performance is highly sensitive to trading frequency  
